@@ -3,8 +3,6 @@ layout: post
 comments: true
 ---
 
-# about java.util.Arrays.ArrayList
-
 `java.util.Arrays.ArrayList`(下文：`Arrays.ArrayList`)是`java.util.Arrays`的私有静态内部类，他实现的接口，继承的父类几乎和`java.util.ArrayList`（下文：`ArrayList`）相同，既然是私有的，那么平常应该是我们少关注的地方。本文尝试对比一两个他们之间的不同点。
 
 ## 使用场景对比
@@ -95,7 +93,7 @@ la.remove("d")
 ```
 这里使用了迭代器的方式进行删除，看这个方法的注释
 
-![clipboard.png](https://segmentfault.com/img/bV7Cr3?w=643&h=303)
+![clipboard.png](/images/2900097773-5ac38376995e4_articlex.png)
 
 如果这个迭代器没有实现`remove`方法的话，那么这整个方法也将要抛出`UnsupportedOperationException`异常的。
 在`AbstractCollection`中`iterator`是一个抽象方法，之于`Arrays.ArrayList`，这个方法实现的位置还是在`AbstractList`，
