@@ -55,6 +55,72 @@ comments: true
     public static native int identityHashCode(Object x);
 ```
 注释写得很明白了，不管一个对象实例的class有没有覆盖Object的hashCode方法，都能使用这个方法获得hash值。
+## 获取泛型类的类型参数
+我们可以从以下代码获得提示，代码来自`HashMap`，
+```
+    /**
+     * Returns x's Class if it is of the form "class C implements
+     * Comparable<C>", else null.
+     */
+    static Class<?> comparableClassFor(Object x) {
+        if (x instanceof Comparable) {
+            Class<?> c; Type[] ts, as; Type t; ParameterizedType p;
+            if ((c = x.getClass()) == String.class) // bypass checks
+                return c;
+            if ((ts = c.getGenericInterfaces()) != null) {
+                for (int i = 0; i < ts.length; ++i) {
+                    if (((t = ts[i]) instanceof ParameterizedType) &&
+                        ((p = (ParameterizedType)t).getRawType() ==
+                         Comparable.class) &&
+                        (as = p.getActualTypeArguments()) != null &&
+                        as.length == 1 && as[0] == c) // type arg is c
+                        return c;
+                }
+            }
+        }
+        return null;
+    }
+```
+这里的逻辑是获得类`C`，然后获取它实现的接口`Comparable<C>`，然后从这个`Comparable<C>`中获得类型参数`C`，然后比较这两个类型是否相等。虽然我们一直听说Java的泛型是类型擦除式，但是在这里我们是可以获得泛型的参数类型的。照例用一段demo测试一下，
+```
+public class ParameterApp {
+    public static void main(String[] args) {
+        StringList list = new StringList();
+        Class<?> clazz = getTypeArgument(list);
+        System.out.println(clazz.getName());
+    }
+
+    static Class<?> getTypeArgument(Object x) {
+        if (x instanceof Collection) {
+            Class<?> c = x.getClass();
+            Type[] ts, as; Type t; ParameterizedType p;
+            if ((ts = c.getGenericInterfaces()) != null) {
+                for (int i = 0; i < ts.length; ++i) {
+                    if (((t = ts[i]) instanceof ParameterizedType) &&
+                            ((as  = ((ParameterizedType)t).getActualTypeArguments()) != null)
+                             &&
+                            as.length == 1) // type arg is c
+                        return (Class<?>) as[0];
+                }
+            }
+        }
+        return null;
+    }
+
+    static class StringList extends AbstractList<String> implements List<String> {
+
+        @Override
+        public String get(int i) {
+            return null;
+        }
+
+        @Override
+        public int size() {
+            return 0;
+        }
+    }
+}
+```
 ## sun.reflect.Reflection
 这个工具类是和反射相关的，让大家知道有这么一个方法
 ```
