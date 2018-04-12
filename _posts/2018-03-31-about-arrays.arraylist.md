@@ -2,6 +2,7 @@
 layout: post
 category: java
 comments: true
+title: 说一说java.util.Arrays.ArrayList
 ---
 * content
 {:toc}

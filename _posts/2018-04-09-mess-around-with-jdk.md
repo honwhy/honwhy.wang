@@ -2,6 +2,7 @@
 layout: post
 category: java
 comments: true
+title: 一些我认为有用有趣的JDK方法
 ---
 
 * content
