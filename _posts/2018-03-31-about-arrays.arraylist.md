@@ -3,6 +3,8 @@ layout: post
 category: java
 comments: true
 ---
+* content
+{:toc}
 
 `java.util.Arrays.ArrayList`(下文：`Arrays.ArrayList`)是`java.util.Arrays`的私有静态内部类，他实现的接口，继承的父类几乎和`java.util.ArrayList`（下文：`ArrayList`）相同，既然是私有的，那么平常应该是我们少关注的地方。本文尝试对比一两个他们之间的不同点。
 
