@@ -3,6 +3,7 @@ layout: post
 category: java
 comments: true
 title: 一些我认为有用有趣的JDK方法
+tags: JDK
 ---
 
 * content
@@ -14,7 +15,7 @@ title: 一些我认为有用有趣的JDK方法
 
 ## java.util.Objects
 `java.util.Objects`工具类，我觉得好用的几个方法
-```
+```java
     public static boolean equals(Object var0, Object var1) {
         return var0 == var1 || var0 != null && var0.equals(var1);
     }
@@ -43,9 +44,13 @@ title: 一些我认为有用有趣的JDK方法
 * 工具方法都是静态方法
 * 静态方法中只抛出unchecked异常
 
+
+
+
+
 ## java.lang.System
 这个最早应该是在Hello World程序中见到的，推荐它的一个方法
-```
+```java
     /**
      * Returns the same hash code for the given object as
      * would be returned by the default method hashCode(),
@@ -62,7 +67,7 @@ title: 一些我认为有用有趣的JDK方法
 注释写得很明白了，不管一个对象实例的class有没有覆盖Object的hashCode方法，都能使用这个方法获得hash值。
 ## 获取泛型类的类型参数
 我们可以从以下代码获得提示，代码来自`HashMap`，
-```
+```java
     /**
      * Returns x's Class if it is of the form "class C implements
      * Comparable<C>", else null.
@@ -87,7 +92,7 @@ title: 一些我认为有用有趣的JDK方法
     }
 ```
 这里的逻辑是获得类`C`，然后获取它实现的接口`Comparable<C>`，然后从这个`Comparable<C>`中获得类型参数`C`，然后比较这两个类型是否相等。虽然我们一直听说Java的泛型是类型擦除式，但是在这里我们是可以获得泛型的参数类型的。照例用一段demo测试一下，
-```
+```java
 public class ParameterApp {
     public static void main(String[] args) {
         StringList list = new StringList();
@@ -128,12 +133,12 @@ public class ParameterApp {
 ```
 ## sun.reflect.Reflection
 这个工具类是和反射相关的，让大家知道有这么一个方法
-```
+```java
     @CallerSensitive
     public static native Class<?> getCallerClass();
 ```
 我第一次见到这个方法是在`java.sql.DriverManager`中的`getConnection`方法中见到的
-```
+```java
     @CallerSensitive
     public static Connection getConnection(String url,
         String user, String password) throws SQLException {
@@ -150,13 +155,13 @@ public class ParameterApp {
     }
 ```
 `Reflection.getCallerClass()`是一个`native`方法，返回的是`Class<?>`类型，在`DriverManager`中使用它的目的是为了获得相应的`ClassLoader`，上面的代码是在Java 8中见到的。其中在Java 7中为获得`ClassLoader`，`DriverManager`就直接提供了`native`的方法
-```
+```java
 /* Returns the caller's class loader, or null if none */
 private static native ClassLoader getCallerClassLoader();
 ```
 
 我们用一段代码尝试调用这个方法
-```
+```java
 public class CalleeApp {
 
     public void call() {
@@ -165,7 +170,7 @@ public class CalleeApp {
     }
 }
 ```
-```
+```java
 public class CallerApp {
 
     public static void main(String[] args) {
@@ -186,7 +191,7 @@ public class CallerApp {
 }
 ```
 执行main方法会抛出异常
-```
+```java
 Exception in thread "main" java.lang.InternalError: CallerSensitive annotation expected at frame 1
 ```
 这个错误信息说的是我们缺少在函数调用栈开始位置添加`CallerSensitive`注解，观察`DriverManager`的`getConnection`方法确实是有这么个注解的。
@@ -194,7 +199,7 @@ Exception in thread "main" java.lang.InternalError: CallerSensitive annotation e
 
 ## Object.wait(long timeout, int nanos)
 这个方法是来卖萌，它的本义在注释是这样子写的，
-```
+```java
     /*
      * <p>
      * This method is similar to the {@code wait} method of one
@@ -209,7 +214,7 @@ Exception in thread "main" java.lang.InternalError: CallerSensitive annotation e
 ```
 意思是提供精细化的时间衡量，`nano`可是纳秒单位啊！！！
 而它的实现却是这样的，
-```
+```java
     public final void wait(long timeout, int nanos) throws InterruptedException {
         if (timeout < 0) {
             throw new IllegalArgumentException("timeout value is negative");
