@@ -9,7 +9,7 @@
 title: Honwhy
 brief-intro: 
 baseurl: "" # the subpath of your site, e.g. /blog
-url: "https://honwhy.github.io" # the base hostname & protocol for your site
+url: "http://honwhy.wang" # the base hostname & protocol for your site
 
 permalink: /:year/:month/:day/:title/
 
