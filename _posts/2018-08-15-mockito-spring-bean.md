@@ -187,7 +187,7 @@ public class MockitoDependencyInjectionTestExecutionListener extends DependencyI
 TestCase中加上@Mock的属性可以是接口也可以是具体实现类，获得属性的类型Class，执行Mock；
 * @Spy的处理
 
-TestCase中加上@Spy的属性只能是具体实现类，这里通过属性的名字首先先从容器中获取，返回的Spring Bean有可能是一个AopProxy对象，而我们Spy的目标是AopProxy对象的目标对象，使用Mockito.spy目前对象然后替换；如果不是AopProxy对象，
+TestCase中加上@Spy的属性只能是具体实现类，这里通过属性的名字首先先从容器中获取，返回的Spring Bean有可能是一个AopProxy对象，而我们Spy的目标是AopProxy对象的目标对象，使用Mockito.spy目标对象然后替换；如果不是AopProxy对象，
 执行Spy后后面做法与Mock相同；
 
 * @Autowired的处理
