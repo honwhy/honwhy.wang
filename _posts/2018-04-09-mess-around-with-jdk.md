@@ -233,6 +233,20 @@ Exception in thread "main" java.lang.InternalError: CallerSensitive annotation e
     }
 ```
 除了对传入参数的数值范围校验外，对`nano`的使用紧紧是判断这个变量是否大于0，是则给`timeout`加1，这只是增加了1毫秒的时间，并没有体现出了精细化的地方。
+
+## java.util.Base64
+
+在此之前使用Base64工具可能需要引入apache commons等jar包，Java 8开始集成到JDK中了。
+```
+String message = "H for Hope!";
+byte[] encoded = Base64.getEncoder().encode(message.getBytes());
+System.out.println(new String(encoded));
+byte decoded[] = Base64.getDecoder().decode(encoded);
+System.out.println(new String(decoded));
+```
+`Base64`是单例模式，`getEncoder`返回的是内部静态类`Encoder`的静态成员`RFC4648`，`getDecoder`返回的是内部静态类`Decoder`的静态成员`RFC4648`；decode和encode当然是对应起来的，除此之外应该看到这样的写法值得学习，get方法中没有synchronized也没有去执行new等操作，所有需要的单例都是在类初始化的时候构造好的了。
+
+
 ## 附
 * [you-dont-need-serial](https://wdd.js.org/you-dont-need-serial.html)
 * [Reflection.getCallerClass()使用的问题](https://segmentfault.com/q/1010000014119325)
