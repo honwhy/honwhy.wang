@@ -84,15 +84,20 @@ trans.transform(new DOMSource(doc), new StreamResult(os));
 ```
 follow the code comments, it is clearly several parts to making the job done, the key line is `signature.sign(dsc);`;
 
-Secondly, debuging into the `sign` method, you will notice such as `digestReference`, `digest` invocations, that is for Message Digest, and `sign` invocation, that is for Signature signing.
-If you want to supply another provider to do the signing, you will have to implements the interface `SignatureMethod`, or extends the abstract class `DOMSignatureMethod`. However, the `sign` method in `DOMSignatureMethod` as you will override, is a little more complicated, even coupled with `org.jcp.xml.dsig.internal.dom.SignatureProvider`, ahd must take care of DOM structure yourself.
+Secondly, debuging into the `sign` method, you will notice such as,
+* `digestReference`, `digest` invocations
+that is for Message Digest
+* `sign` invocation
+that is for Signature signing.
+
+If you want to supply another provider to do the signing, you will have to implements the interface `SignatureMethod`, or extends the abstract class `DOMSignatureMethod`. However, the `sign` method in `DOMSignatureMethod` as you will override, is a little more complicated, even coupled with `org.jcp.xml.dsig.internal.dom.SignatureProvider`, and must take care of DOM structure yourself.
 
 ![code](https://image-static.segmentfault.com/222/171/2221712014-5b929730d10f8_articlex)
 
 
 ## use apache xmlsec
 
-The apache xmlsec has supply boilerplate code to do XMLSignature, but in a more clear style,
+The apache xmlsec has supply boilerplate code to do XMLSignature, but in a more clearly style,
 
 ```java
 public String signWithKeyPair(String sourceXml, KeyPair kp) throws Exception {
@@ -130,7 +135,7 @@ public String signWithKeyPair(String sourceXml, KeyPair kp) throws Exception {
 }
 ```
 
-If use `xmlsec` and want to supply your own Provider to make signature, it will be less effort to hook into the *Architecture*. It will be making more sense when you extends `SignatureAlgorithm` class, supply your engine and override the following methods,
+If use `xmlsec` and want to supply your own Provider to make signature, it will be less effort to hook into the *Architecture*. and also making more sense when you extends `SignatureAlgorithm` class, supply your *engine* to override the following methods,
 
 ```java
     @Override
@@ -218,10 +223,10 @@ not need to take care of the DOM structure any more.
 Making this post more specific, I will show more codes about extends `SignatureAlgorithm` class along with using the engine from Bouncy Castle Provider.
 
 ```java
-public class BcSignatureAlgorithm extends SignatureAlgorithm{
+public class BcSignatureAlgorithm extends AbstractSignatureAlgorithm {
 
-    private Signature engine;
-    private static BouncyCastleProvider provider = new BouncyCastleProvider();
+    protected Signature engine;
+    protected static BouncyCastleProvider provider = new BouncyCastleProvider();
     public BcSignatureAlgorithm(Document doc, String algorithmURI) throws XMLSecurityException {
         super(doc, algorithmURI);
         initEngine();
@@ -242,9 +247,9 @@ public class BcSignatureAlgorithm extends SignatureAlgorithm{
         initEngine();
     }
 
-    private void initEngine() throws XMLSecurityException {
+    protected void initEngine() throws XMLSecurityException {
         try {
-            engine = Signature.getInstance("RSA", provider);
+            engine = Signature.getInstance("SHA1withRSA", provider);
         } catch (NoSuchAlgorithmException e) {
             throw new XMLSignatureException(e);
         }
@@ -269,7 +274,7 @@ public String signWithCert(String sourceXml, PrivateKey privateKey, X509Certific
             null, Constants._ATT_ALGORITHM, Canonicalizer.ALGO_ID_C14N_OMIT_COMMENTS
     );
 
-    SignatureAlgorithm signatureAlgorithm =
+    AbstractSignatureAlgorithm signatureAlgorithm =
             new BcSignatureAlgorithm(doc, XMLSignature.ALGO_ID_SIGNATURE_RSA_SHA1);//use BcSignatureAlgorithm
     XMLSignature sig =
             new XMLSignature(doc, null, signatureAlgorithm.getElement(), canonElem);
@@ -285,13 +290,15 @@ public String signWithCert(String sourceXml, PrivateKey privateKey, X509Certific
 
     sig.getKeyInfo().addKeyName(signingCert.getSerialNumber().toString());
     sig.getKeyInfo().add(x509data);
-    sig.sign(privateKey);
+    //sig.sign(privateKey);
+    signatureAlgorithm.doSign(privateKey,sig.getSignedInfo());
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
 
     XMLUtils.outputDOMc14nWithComments(doc, bos);
     return new String(bos.toByteArray(), "utf-8");
 }
 ```
+`AbstractSignatureAlgorithm` will finished the jobs that `XMLSignature.sign(PrivateKey)` used to do, actually `doSign` method copy lines from it, and make sure the signature value should set to SignatureValue Element as a text node element. Last but not least, thought `BcSignatureAlgorithm` is behind the sight, it has used the engine from the Bouncy Castle and produce the signature.
 
 ## For More Information
 [Programming With the Java XML Digital Signature API](https://www.oracle.com/technetwork/articles/javase/dig-signature-api-140772.html)
