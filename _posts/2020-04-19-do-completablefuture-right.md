@@ -80,7 +80,7 @@ java.util.concurrent.TimeoutException
 ```
 get方法需要等待task-1,3,5,6,10,14完成，但是执行到task-6时就因为超时结束了，但是从日志中还可以看到task-10,14都执行了，这里验证了我们的猜测。
 
-### 解决多余的Runnable被执行
+## 解决多余的Runnable被执行
 在网上也找到了关于这个get超时后没有清理Runnable的问题，
 >http://arganzheng.life/writing-asynchronous-code-with-completablefuture.html   
 >默认情况下，allOf 会等待所有的任务都完成，即使其中有一个失败了，也不会影响其他任务继续执行。
@@ -127,7 +127,7 @@ java.util.concurrent.TimeoutException
 ```
 可以看到task-6之后get超时了，后续的task-10,14都没有执行了。
 
-### 使用缓存加速响应
+## 使用缓存加速响应
 使用缓存当然是一个提高响应速度的一个好办法了，是不是在这个场景中也适用呢。实际上也是适用的，假设在业务的高峰期，用户的请求参数几乎没有改变的，不同用户的请求也可能存在参数相同的情况，偶尔的方法体内出现了get超时，用户获取了空的响应，再不断地重试，针对这些增加缓存肯定是有助于提高响应效率的。本文设计的解决方法是使用Guava Cache，它可以控制Cache的大小，命中的cache还继续延长存活时间，还可以使用弱引用对gc友好等，属于堆内缓存，相比Redis等外部缓存或许Guava Cache更适合。
 
 ```java
@@ -194,7 +194,7 @@ for (int i = 0; i < size; i++) {
 }
 ```
 
-### 继续异步
+## 继续异步
 如果方法体有需要多线程http请求外部接口的话，是否可以使用nio的方式，将执行线程等待http响应时将其挂起让出cpu，或者去执行其他任务，设想还算美好。
 使用异步的http客户端只需要引入`AsyncHttpClient`，
 ```java
@@ -242,6 +242,6 @@ for (int i = 0; i < size; i++) {
 ```
 实际的测试效果并不理想，`AsyncHttpRequestTask`执行结果不如`HttpRequestTask`。
 
-### 总结
+## 总结
 至此，本文关于CompletableFuture的正确使用及优化方案都所有提及，正确的使用方案一定是符合业务需求的，优化的目的和手段也是和业务需求一致的，在追求多线程编程正确及效率上还有很多的期待。   
 参考代码，[fgc](https://github.com/honwhy/fgc)
