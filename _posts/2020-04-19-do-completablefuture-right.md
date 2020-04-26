@@ -80,7 +80,7 @@ java.util.concurrent.TimeoutException
 ```
 get方法需要等待task-1,3,5,6,10,14完成，但是执行到task-6时就因为超时结束了，但是从日志中还可以看到task-10,14都执行了，这里验证了我们的猜测。
 
-## 解决多余的Runnable被执行
+## 解决多余的Runnable被执行的问题
 在网上也找到了关于这个get超时后没有清理Runnable的问题，
 >http://arganzheng.life/writing-asynchronous-code-with-completablefuture.html   
 >默认情况下，allOf 会等待所有的任务都完成，即使其中有一个失败了，也不会影响其他任务继续执行。
