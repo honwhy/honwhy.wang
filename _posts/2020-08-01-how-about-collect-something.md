@@ -155,6 +155,37 @@ public interface MyStream<T,V> {
 ```
 这样看起这个设计又不美了，但是如果有更多的外部接口需要调用，CollectStringStream就显得很有价值了，新加入再多的请求外部接口要改动的代码很少很少，所以这种思想我觉得是值得推广的。
 
+
+针对这个CollectStringStream抽象能力不足问题再次抽象处理，结果
+```java
+public final class StreamTool {
+
+    static Executor executor = Executors.newFixedThreadPool(4);
+
+    @SuppressWarnings("CatchMayIgnoreException")
+    public static <T,V> List<T> toList(List<MyProvider<T, V>> myProviders, V v) {
+        ListCollector<T> collectorTool = new ListCollector<>();
+        List<CompletableFuture<Void>> pfs = new ArrayList<>(myProviders.size());
+        for (MyProvider<T, V> provider : myProviders) {
+            CompletableFuture<Void> pf = CompletableFuture.runAsync(() -> collectorTool.collectList(provider.provide(v)), executor);
+            pfs.add(pf);
+        }
+        try {
+            CompletableFuture.allOf(pfs.toArray(new CompletableFuture[0])).get(3, TimeUnit.SECONDS);
+        } catch (Exception e) {
+            if (e instanceof TimeoutException) {
+                pfs.forEach(p -> {
+                    if (!p.isDone()){
+                        p.cancel(true);
+                    }});
+            }
+        }
+        return collectorTool.retList();
+    }
+}
+```
+关于executor线程池的处理也可以做成参数形式传入StreamTool.toList方法，从toList还可以引申其他收集方式的；
+
 ## 总结
 照例附上参考代码，不过值得思考的是我们如何像优秀的代码学习并运用到自己的项目中。  
 参考代码，[java-toy](https://github.com/honwhy/java-toy)
