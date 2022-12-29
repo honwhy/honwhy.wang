@@ -13,3 +13,5 @@ book websites connect to Shenzhen library, for Firefox.
 - [ftpcp2](https://github.com/honwhy/ftpcp2)
 ftp connection pool implementation
 
+## 公众号
+![qrcode_for_gh_9defcdafa62f_344](https://user-images.githubusercontent.com/2212273/209985800-347fde6d-52a3-40ea-8f41-6a8900e88bf0.jpg)
